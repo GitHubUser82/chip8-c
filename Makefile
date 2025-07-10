@@ -27,3 +27,4 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 # Clean project
 clean:
 	rm -rfv $(BUILD_DIR)/* $(BIN_DIR)/*
+# Run final executable
