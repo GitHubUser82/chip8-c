@@ -14,14 +14,12 @@ all: $(BIN_DIR)/$(PROG)
 
 # Link final executable
 $(BIN_DIR)/$(PROG): $(OBJ)
-	#The @ symbol prevents Make from printing the command before executing it.
-	@mkdir -p $(BIN_DIR)
+	mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $^ -Iinclude -L$(LIB_DIR) -lglfw3 -lopengl32 -lgdi32
 
 # Compile .c to .o automatically
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	#The @ symbol prevents Make from printing the command before executing it.
-	@mkdir -p $(BUILD_DIR)
+	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ -c $< -Iinclude
 
 # Clean project
