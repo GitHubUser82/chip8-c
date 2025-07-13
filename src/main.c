@@ -25,6 +25,7 @@ int main() {
 
     while (!inputShouldClose()) {
 
+        processInput();
         chip8Update();
         if (graphicsDidFrameChange() == true) {
             graphicsUpdate();
@@ -33,7 +34,6 @@ int main() {
             glfwWaitEventsTimeout(1.0 / TARGET_FPS);
         }
 
-        processInput();
     }
 
     graphicsTerminate();

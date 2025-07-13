@@ -12,6 +12,7 @@
 
 static void chip8ScreenToRGBA(void);
 
+static const char* windowName = "CHIP-8 interpreter";
 static const int SCREEN_WIDTH = 1280;
 static const int SCREEN_HEIGHT = 720;
 static const float clearColor[4] = {0.0f, 0.4f, 0.7f, 1.0f};
@@ -77,7 +78,7 @@ int graphicsInit() {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     #endif
 
-    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL", NULL, NULL);
+    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, windowName, NULL, NULL);
     if (window == NULL) {
         fprintf(stderr, "[graphics] ERROR: failed to create GLFW window\n");
         glfwTerminate();
