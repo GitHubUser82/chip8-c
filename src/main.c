@@ -25,14 +25,20 @@ int main() {
 
     while (!inputShouldClose()) {
 
+        double startTime = glfwGetTime();
+
         processInput();
         chip8Update();
-        if (graphicsDidFrameChange() == true) {
+        if (graphicsDidFrameChange()==true) {
             graphicsUpdate();
             graphicsSetFrameChanged(false);
-        } else {
-            glfwWaitEventsTimeout(1.0 / TARGET_FPS);
         }
+
+        double elapsedTime = glfwGetTime() - startTime;
+        //the time that needs to be slept to maintain 60 FPS
+        double sleepTime = (1.0 / TARGET_FPS) - elapsedTime;
+        if (sleepTime > 0.0)
+            glfwWaitEventsTimeout(sleepTime);
 
     }
 

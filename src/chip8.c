@@ -24,6 +24,8 @@ void randomizeScreen() {
 }
 
 void chip8Update() {
+    randomizeScreen();
+    graphicsSetFrameChanged(true);
 }
 
 /* static void printScreenToConsole() {

@@ -96,6 +96,7 @@ int graphicsInit() {
     }
 
     glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+    glClear(GL_COLOR_BUFFER_BIT);
 
 
     /* part2: initializing OpenGL's state to be able to draw the CHIP-8 screen: it will scale up
@@ -157,7 +158,7 @@ void graphicsUpdate() {
 
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, CHIP8_DISPLAY_WIDTH, CHIP8_DISPLAY_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, screenBytes);
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    //glClear(GL_COLOR_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const void*) 0);
 
     glfwSwapBuffers(window);
