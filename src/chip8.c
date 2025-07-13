@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <graphics.h>
+
 #define CHIP8_DISPLAY_WIDTH 64
 #define CHIP8_DISPLAY_HEIGHT 32
 
@@ -13,7 +15,7 @@ bool (*getChip8Screen())[CHIP8_DISPLAY_WIDTH] {
     return chip8Screen;
 }
 
-static void randomizeScreen() {
+void randomizeScreen() {
     for (int i=0; i<CHIP8_DISPLAY_HEIGHT; i++) {
         for (int j=0; j<CHIP8_DISPLAY_WIDTH; j++) {
             chip8Screen[i][j]=(bool)(rand()%2);
@@ -22,10 +24,9 @@ static void randomizeScreen() {
 }
 
 void chip8Update() {
-    randomizeScreen();
 }
 
-/* static void _printScreenToConsole() {
+/* static void printScreenToConsole() {
     for (int i=0; i<CHIP8_DISPLAY_HEIGHT; i++) {
         for (int j=0; j<CHIP8_DISPLAY_WIDTH; j++) {
             printf("%d", (int)chip8Screen[i][j]);

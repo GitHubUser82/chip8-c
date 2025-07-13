@@ -10,8 +10,7 @@
 
 
 /*TO DO:
-    - cross-platform sleep
-    - correct quad size to correspond to CHIP-8 screen ration*/
+    - correct quad size to correspond to CHIP-8 screen ration */
 
 
 /* functions whose name begin with "graphics" are from the graphics.c module ;
@@ -22,10 +21,19 @@ int main() {
     graphicsInit();
     inputInit();
 
-    while (!graphicsShouldClose()) {
-        processInput();
+    randomizeScreen(); //to remove later
+
+    while (!inputShouldClose()) {
+
         chip8Update();
-        graphicsUpdate();
+        if (graphicsDidFrameChange() == true) {
+            graphicsUpdate();
+            graphicsSetFrameChanged(false);
+        } else {
+            glfwWaitEventsTimeout(1.0 / TARGET_FPS);
+        }
+
+        processInput();
     }
 
     graphicsTerminate();

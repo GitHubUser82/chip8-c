@@ -1,10 +1,14 @@
 #pragma once
 
 #include <glfw3.h>
-#include<glad.h>
+
+extern const double TARGET_FPS;
 
 GLFWwindow* graphicsGetWindow(void);
+
+void graphicsSetFrameChanged(bool);
+bool graphicsDidFrameChange(void);
+
 int graphicsInit(void);
 void graphicsUpdate(void);
-bool graphicsShouldClose(void);
 void graphicsTerminate(void);

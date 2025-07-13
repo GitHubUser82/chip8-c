@@ -16,8 +16,10 @@ static const int SCREEN_WIDTH = 1280;
 static const int SCREEN_HEIGHT = 720;
 static const float clearColor[4] = {0.0f, 0.4f, 0.7f, 1.0f};
 
-static const double TARGET_FPS = 60.0;
+const double TARGET_FPS = 60.0;
 //static const double TARGET_FPS = 1.0;
+
+static bool frameChanged = true;
 
 static GLFWwindow* window = NULL;
 
@@ -32,6 +34,8 @@ static float screenOffColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 typedef struct {
     unsigned int shaderProgram;
     unsigned int vao;
+    unsigned int screenQuadId; //vbo
+    unsigned int ebo;
     unsigned int texture;
 } openGlState;
 static openGlState renderState; 
@@ -41,8 +45,16 @@ GLFWwindow* graphicsGetWindow() {
     return window;
 }
 
+void graphicsSetFrameChanged(bool newValue) {
+    frameChanged = newValue;
+}
+
+bool graphicsDidFrameChange() {
+    return frameChanged;
+}
 
 int graphicsInit() {
+
     chip8Screen = getChip8Screen();
     screenBytes = malloc(CHIP8_DISPLAY_HEIGHT * CHIP8_DISPLAY_WIDTH * 4 * sizeof(unsigned char));
     if (!screenBytes) {
@@ -54,7 +66,7 @@ int graphicsInit() {
 
     if (!glfwInit()) {
         fprintf(stderr, "[graphics] ERROR in graphicsInit: glfwInit failed\n");
-        return 1;
+        return -1;
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -74,6 +86,8 @@ int graphicsInit() {
 
     glfwMakeContextCurrent(window);
     glfwSetWindowAspectRatio(window, 16, 9);
+
+    glfwSwapInterval(1);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         printf("Failed to initialize GLAD\n");
@@ -103,18 +117,16 @@ int graphicsInit() {
     glGenVertexArrays(1, &(renderState.vao));
     glBindVertexArray(renderState.vao);
 
-    unsigned int screenQuadId;
-    glGenBuffers(1, &screenQuadId);
-    glBindBuffer(GL_ARRAY_BUFFER, screenQuadId);
+    glGenBuffers(1, &renderState.screenQuadId);
+    glBindBuffer(GL_ARRAY_BUFFER, renderState.screenQuadId);
     glBufferData(GL_ARRAY_BUFFER, sizeof(screenQuad), screenQuad, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (const void*)0);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (const void*)(2*sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    unsigned int ebo;
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glGenBuffers(1, &renderState.ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderState.ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glGenTextures(1, &(renderState.texture));
@@ -128,6 +140,8 @@ int graphicsInit() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHIP8_DISPLAY_WIDTH, CHIP8_DISPLAY_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, screenBytes);
+
     glBindVertexArray(renderState.vao);
     glBindTexture(GL_TEXTURE_2D, renderState.texture);
     renderState.shaderProgram = getShaderProgram();
@@ -138,32 +152,23 @@ int graphicsInit() {
 
 void graphicsUpdate() {
 
-    double startTime = glfwGetTime();//
-
     chip8ScreenToRGBA();
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHIP8_DISPLAY_WIDTH, CHIP8_DISPLAY_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, screenBytes);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, CHIP8_DISPLAY_WIDTH, CHIP8_DISPLAY_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, screenBytes);
 
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const void*) 0);
 
     glfwSwapBuffers(window);
-    glfwPollEvents();
-
-    double currentTime = glfwGetTime();
-    double elapsedTime = currentTime-startTime;
-    double sleepTime = (1.0/TARGET_FPS)-elapsedTime;
-    if (sleepTime>0.0)
-        Sleep(sleepTime*1000);
-
-}
-
-bool graphicsShouldClose(void) {
-    return glfwWindowShouldClose(window);
 }
 
 void graphicsTerminate() {
     free(screenBytes);
+    glDeleteVertexArrays(1, &renderState.vao);
+    glDeleteBuffers(1, &renderState.screenQuadId);
+    glDeleteBuffers(1, &renderState.ebo);
+    glDeleteTextures(1, &renderState.texture);
+    glDeleteProgram(renderState.shaderProgram);
     glfwDestroyWindow(window);
     glfwTerminate();
 }

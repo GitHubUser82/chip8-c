@@ -5,3 +5,7 @@
 
 bool (*getChip8Screen(void))[CHIP8_DISPLAY_WIDTH];
 void chip8Update(void);
+
+
+
+void randomizeScreen(void);

@@ -25,10 +25,16 @@ void processInput() {
         glfwSetWindowShouldClose(window, true);
 }
 
+bool inputShouldClose(void) {
+    return glfwWindowShouldClose(window);
+}
+
+
 //glfw: whenever the window size changed (by OS or user resize) this callback function executes
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 
     /* makes sure the viewport (OpenGL's drawing surface) matches the new window dimensions; note that width and 
     height will be significantly larger than specified on retina displays. */
     glViewport(0, 0, width, height);
+    graphicsSetFrameChanged(true);
 }
