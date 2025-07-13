@@ -88,7 +88,7 @@ int graphicsInit() {
     glfwMakeContextCurrent(window);
     glfwSetWindowAspectRatio(window, 16, 9);
 
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         printf("Failed to initialize GLAD\n");
