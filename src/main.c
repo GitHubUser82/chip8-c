@@ -8,6 +8,8 @@
 #include <input.h>
 #include <chip8.h>
 
+#include <windows.h>
+
 
 /*TO DO:
     - correct quad size to correspond to CHIP-8 screen ration */
@@ -27,18 +29,20 @@ int main() {
 
         double startTime = glfwGetTime();
 
+        glfwPollEvents();
         processInput();
         chip8Update();
-        if (graphicsDidFrameChange()==true) {
-            graphicsUpdate();
+
+        if (graphicsDidFrameChange()) {
+            graphicsUpdate(); // Upload texture + draw
             graphicsSetFrameChanged(false);
         }
 
-        double elapsedTime = glfwGetTime() - startTime;
-        //the time that needs to be slept to maintain 60 FPS
-        double sleepTime = (1.0 / TARGET_FPS) - elapsedTime;
+        double elapsed = glfwGetTime() - startTime;
+        double sleepTime = 1.0/TARGET_FPS - elapsed;
         if (sleepTime > 0.0)
-            glfwWaitEventsTimeout(sleepTime);
+            //glfwWaitEventsTimeout(sleepTime);
+            Sleep(sleepTime * 1000);
 
     }
 
