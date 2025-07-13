@@ -1,18 +1,23 @@
 #include <glad.h>
 #include <glfw3.h>
 
-const char* vertexShaderSource = 
+static const char* vertexShaderSource = 
     "#version 330 core\n"
     "layout (location = 0) in vec2 aPos;\n"
+    "layout (location = 1) in vec2 aTexCoord;\n"
+    "out vec2 texCoord;\n"
     "void main() {\n"
     "   gl_Position = vec4(aPos.x, aPos.y, 0.0f, 1.0f);\n"
+    "   texCoord=aTexCoord;\n"
     "}";
 
-const char* fragmentShaderSource =
+static const char* fragmentShaderSource =
     "#version 330 core\n"
+    "in vec2 texCoord;\n"
     "out vec4 fragColor;\n"
+    "uniform sampler2D tex;\n"
     "void main() {\n"
-    "   fragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n"
+    "   fragColor = texture(tex, texCoord);\n"
     "}";
 
 static unsigned int compileShader(unsigned int type, const char* source) {
@@ -23,7 +28,7 @@ static unsigned int compileShader(unsigned int type, const char* source) {
     return id;
 }
 
-unsigned int createShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource) {
+static unsigned int createShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource) {
 
     unsigned int vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
     unsigned int fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
@@ -38,4 +43,8 @@ unsigned int createShaderProgram(const char* vertexShaderSource, const char* fra
     glDeleteShader(fragmentShader);
 
     return shaderProgram;
+}
+
+unsigned int getShaderProgram() {
+    return createShaderProgram(vertexShaderSource, fragmentShaderSource);
 }

@@ -3,7 +3,7 @@
 #include <glfw3.h>
 #include<glad.h>
 
-GLFWwindow* getWindow(void);
+GLFWwindow* graphicsGetWindow(void);
 int graphicsInit(void);
 void graphicsUpdate(void);
 bool graphicsShouldClose(void);
