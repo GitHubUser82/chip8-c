@@ -12,24 +12,23 @@
 
 static void chip8ScreenToRGBA(void);
 
+
+
 static const char* windowName = "CHIP-8 interpreter";
 static const int SCREEN_WIDTH = 1280;
 static const int SCREEN_HEIGHT = 720;
-static const float clearColor[4] = {0.0f, 0.4f, 0.7f, 1.0f};
-
 const double TARGET_FPS = 60.0;
-//static const double TARGET_FPS = 1.0;
+static const float clearColor[4] = {0.0f, 0.4f, 0.7f, 1.0f};
+static GLFWwindow* window = NULL;
 
 static bool frameChanged = true;
-
-static GLFWwindow* window = NULL;
 
 /*points to the chip8Screen array of the chip8 module,
 and is initialized using the getChip8Screen of the chip8 module*/
 static bool (*chip8Screen)[CHIP8_DISPLAY_WIDTH];
 //the raw RGBA bytes of the image representing the chip8Screen that will converted to a texture by OpenGL
 unsigned char* screenBytes;
-static float screenOnColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+static float screenOnColor[4] = {0.0f, 0.5f, 0.0f, 1.0f};
 static float screenOffColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
 typedef struct {
@@ -41,21 +40,22 @@ typedef struct {
 } openGlState;
 static openGlState renderState; 
 
+
+
 //should be called after graphicsInit (if needed) by other modules to retrieve a pointer to the window
 GLFWwindow* graphicsGetWindow() {
     return window;
-}
-
-void graphicsSetFrameChanged(bool newValue) {
-    frameChanged = newValue;
 }
 
 bool graphicsDidFrameChange() {
     return frameChanged;
 }
 
-int graphicsInit() {
+void graphicsSetFrameChanged(bool newValue) {
+    frameChanged = newValue;
+}
 
+int graphicsInit() {
     chip8Screen = getChip8Screen();
     screenBytes = malloc(CHIP8_DISPLAY_HEIGHT * CHIP8_DISPLAY_WIDTH * 4 * sizeof(unsigned char));
     if (!screenBytes) {
