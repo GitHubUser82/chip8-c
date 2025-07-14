@@ -8,8 +8,8 @@ A CHIP-8 interpreter written in C, using OpenGL and GLFW for cross-platform rend
 
 ## Installation and Execution
 
-> ⚠️ Currently supported only on **Windows**. Requires `gcc` and `make`.  
-> You can install them easily using [MSYS2](https://www.msys2.org/).
+⚠️ Currently, only **Windows** is supported. `gcc` and `make` required.  
+You can install them easily on Windows using [MSYS2](https://www.msys2.org/).
 
 ### Steps:
 
