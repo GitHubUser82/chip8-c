@@ -11,11 +11,9 @@
 #include <windows.h>
 
 
-#define INSTRUCTIONS_PER_FRAME 50 //multiply by the framerate (i.e. 60) to get the number of instructions per second
-
-
 /*TO DO:
-    - correct quad size to correspond to CHIP-8 screen ration */
+    - retrieve screen dimensions using OpenGL (instead of always assuming a 16:9 screen)
+    - correct quad size to correspond to CHIP-8 screen ratio (1:2) */
 
 
 /* functions whose name begin with "graphics" are from the graphics.c module ;
@@ -38,8 +36,9 @@ int main(int argc, char* argv[]) {
 
         glfwPollEvents();
         processInput();
-        //chip8Update();
-        chip8ExecuteInstructions(INSTRUCTIONS_PER_FRAME);
+
+        if (chip8Update() != 0)
+            return 1;
 
         if (graphicsDidFrameChange()) {
             graphicsUpdate();

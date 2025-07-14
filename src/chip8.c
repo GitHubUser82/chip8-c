@@ -17,6 +17,9 @@ static int loadFileToMemory(const char*);
 #define CHIP8_MEMORY_SIZE 4096 //in bytes
 #define STARTING_MEMORY_ADDRESS 0x200
 
+#define INSTRUCTIONS_PER_SECOND 700
+
+
 typedef struct {
     uint8_t  V[16]; //General purpose registers
     uint16_t I; //Index register
@@ -55,8 +58,10 @@ static int loadFileToMemory(const char* filepath) {
         fprintf(stderr, "[chip8] ERROR: could not open specified file");
         return 1;
     }
-    size_t nbOfBytesRead = fread(state.memory+STARTING_MEMORY_ADDRESS, 1, CHIP8_MEMORY_SIZE-STARTING_MEMORY_ADDRESS, fp);
-    //printf("%zu bytes read\n", nbOfBytesRead);
+
+    //size_t nbOfBytesRead = fread(state.memory+STARTING_MEMORY_ADDRESS, 1, CHIP8_MEMORY_SIZE-STARTING_MEMORY_ADDRESS, fp);
+    fread(state.memory+STARTING_MEMORY_ADDRESS, 1, CHIP8_MEMORY_SIZE-STARTING_MEMORY_ADDRESS, fp);
+    
     fclose(fp);
 
     return 0;
@@ -81,7 +86,7 @@ static int executeInstruction() {
         state.PC+=2;
     }
     else {
-        fprintf(stderr, "[chip8] ERROR: attemp to read from an invalid memory address (out of bounds)");
+        fprintf(stderr, "[chip8] ERROR: attempt to read from an invalid memory address (out of bounds)");
         return 1;
     }
 
@@ -108,6 +113,8 @@ static int executeInstruction() {
         case 0x1:
             state.PC=nnn;
             break;
+        case 0x2:
+
         case 0x6:
             state.V[x]=nn;
             break;
@@ -118,6 +125,7 @@ static int executeInstruction() {
             state.I=nnn;
             break;
         case 0xD:
+            //
             state.V[0xF] = 0;
             uint8_t vx = state.V[x];
             uint8_t vy = state.V[y];
@@ -141,15 +149,18 @@ static int executeInstruction() {
 
 }
 
-void chip8ExecuteInstructions(int nbOfInstructions) {
+static int executeInstructions(int nbOfInstructions) {
     for (int i=0; i<nbOfInstructions; i++)
-        executeInstruction();
+        if (executeInstruction() != 0)
+            return 1;
+    return 0;
 }
 
-/* void chip8Update() {
-    randomizeScreen();
-    graphicsSetFrameChanged(true);
-} */
+int chip8Update() {
+    if (executeInstructions((int)INSTRUCTIONS_PER_SECOND/TARGET_FPS) != 0)
+        return 1;
+    return 0;
+} 
 
 /* void randomizeScreen() {
     for (int i=0; i<CHIP8_DISPLAY_HEIGHT; i++) {

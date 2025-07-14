@@ -13,21 +13,28 @@
 static void chip8ScreenToRGBA(void);
 
 
+//GLOBAL VARIABLES (accessible outside of this file)
+const double TARGET_FPS = 60.0;
+
+
+//STATIC VARIABLES (only used inside this file)
 
 static const char* windowName = "CHIP-8 interpreter";
 static const int SCREEN_WIDTH = 1280;
 static const int SCREEN_HEIGHT = 720;
-const double TARGET_FPS = 60.0;
 static const float clearColor[4] = {0.0f, 0.4f, 0.7f, 1.0f};
 static GLFWwindow* window = NULL;
 
 static bool frameChanged = true;
 
-/*points to the chip8Screen array of the chip8 module,
-and is initialized using the getChip8Screen of the chip8 module*/
+/*points to the chip8Screen bool array of the chip8 module,
+and is initialized using the getChip8Screen of the chip8 module (in graphicsInit)*/
 static bool (*chip8Screen)[CHIP8_DISPLAY_WIDTH];
+
 //the raw RGBA bytes of the image representing the chip8Screen that will converted to a texture by OpenGL
 unsigned char* screenBytes;
+
+//colors used by the rendering system to represent ON and OFF pixels on the CHIP-8 screen
 static float screenOnColor[4] = {0.0f, 0.5f, 0.0f, 1.0f};
 static float screenOffColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
@@ -39,7 +46,6 @@ typedef struct {
     unsigned int texture;
 } openGlState;
 static openGlState renderState; 
-
 
 
 //should be called after graphicsInit (if needed) by other modules to retrieve a pointer to the window
@@ -90,6 +96,7 @@ int graphicsInit() {
 
     glfwSwapInterval(0);
 
+    //glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         printf("Failed to initialize GLAD\n");
         return -1;
@@ -115,10 +122,11 @@ int graphicsInit() {
         1, 2, 3
     };
 
-
+    //vao
     glGenVertexArrays(1, &(renderState.vao));
     glBindVertexArray(renderState.vao);
 
+    //vbo and attributes
     glGenBuffers(1, &renderState.screenQuadId);
     glBindBuffer(GL_ARRAY_BUFFER, renderState.screenQuadId);
     glBufferData(GL_ARRAY_BUFFER, sizeof(screenQuad), screenQuad, GL_STATIC_DRAW);
@@ -127,26 +135,30 @@ int graphicsInit() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (const void*)(2*sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    //ebo
     glGenBuffers(1, &renderState.ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderState.ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+    //texture
     glGenTextures(1, &(renderState.texture));
     glBindTexture(GL_TEXTURE_2D, renderState.texture);
 
-    // Wrapping (for texture coordinates outside [0,1])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clearColor);  
-    // Filtering (scaling)
+    
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHIP8_DISPLAY_WIDTH, CHIP8_DISPLAY_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, screenBytes);
 
+    //shader program
+    renderState.shaderProgram = getShaderProgram();
+
+    //setting up the OpenGL context for subsequent graphicsUpdate calls
     glBindVertexArray(renderState.vao);
     glBindTexture(GL_TEXTURE_2D, renderState.texture);
-    renderState.shaderProgram = getShaderProgram();
     glUseProgram(renderState.shaderProgram);
 
     return 0;
@@ -158,24 +170,29 @@ void graphicsUpdate() {
 
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, CHIP8_DISPLAY_WIDTH, CHIP8_DISPLAY_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, screenBytes);
 
-    //glClear(GL_COLOR_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const void*) 0);
 
     glfwSwapBuffers(window);
 }
 
 void graphicsTerminate() {
+
     free(screenBytes);
+
+    //deletes data sent to GPU via OpenGL
     glDeleteVertexArrays(1, &renderState.vao);
     glDeleteBuffers(1, &renderState.screenQuadId);
     glDeleteBuffers(1, &renderState.ebo);
     glDeleteTextures(1, &renderState.texture);
     glDeleteProgram(renderState.shaderProgram);
+
+    //terminates and closes the window
     glfwDestroyWindow(window);
     glfwTerminate();
 }
 
-//updates screenBytes using chip8Screen
+/* updates screenBytes (RGBA buffer that will be passed as a texture to the OpenGL context)
+using chip8Screen (bool array) */
 static void chip8ScreenToRGBA() {
     for (unsigned int y = 0; y < CHIP8_DISPLAY_HEIGHT; y++) {
         for (unsigned int x = 0; x < CHIP8_DISPLAY_WIDTH; x++) {

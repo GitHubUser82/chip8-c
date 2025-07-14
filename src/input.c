@@ -17,7 +17,9 @@ void inputInit() {
     if ((window=graphicsGetWindow())==NULL) {
         fprintf(stderr, "[ERROR] input: inputInit failed to retrieve window\n");
     }
+
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+
 }
 
 void processInput() {
@@ -30,11 +32,16 @@ bool inputShouldClose(void) {
 }
 
 
-//glfw: whenever the window size changed (by OS or user resize) this callback function executes
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+
+    glfwMakeContextCurrent(window);
+
+    glClear(GL_COLOR_BUFFER_BIT);
 
     /* makes sure the viewport (OpenGL's drawing surface) matches the new window dimensions; note that width and 
     height will be significantly larger than specified on retina displays. */
     glViewport(0, 0, width, height);
+
     graphicsSetFrameChanged(true);
+
 }
