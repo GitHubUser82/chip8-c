@@ -1,5 +1,7 @@
 # .gitignore
 *.exe
 *.o
-.vscode/
-.roms/
+.vscode/*
+.roms/*
+*.ch8
+*.txt

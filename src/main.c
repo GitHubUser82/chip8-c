@@ -26,6 +26,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    //graphicsInit should always be before inputInit, because the latter retrieves the GLFW window pointer from the graphics module
     graphicsInit();
     inputInit();
     chip8Init(argv[1]);
@@ -40,7 +41,7 @@ int main(int argc, char* argv[]) {
         if (chip8Update() != 0)
             return 1;
 
-        if (graphicsDidFrameChange()) {
+        if (graphicsDidFrameChange()==true) {
             graphicsUpdate();
             graphicsSetFrameChanged(false);
         }

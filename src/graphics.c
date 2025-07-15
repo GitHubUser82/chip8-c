@@ -35,7 +35,7 @@ static bool (*chip8Screen)[CHIP8_DISPLAY_WIDTH];
 unsigned char* screenBytes;
 
 //colors used by the rendering system to represent ON and OFF pixels on the CHIP-8 screen
-static float screenOnColor[4] = {0.0f, 0.5f, 0.0f, 1.0f};
+static float screenOnColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 static float screenOffColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
 typedef struct {
@@ -44,8 +44,8 @@ typedef struct {
     unsigned int screenQuadId; //vbo
     unsigned int ebo;
     unsigned int texture;
-} openGlState;
-static openGlState renderState; 
+} OpenGlState;
+static OpenGlState renderState;
 
 
 //should be called after graphicsInit (if needed) by other modules to retrieve a pointer to the window
@@ -94,7 +94,7 @@ int graphicsInit() {
     glfwMakeContextCurrent(window);
     glfwSetWindowAspectRatio(window, 16, 9);
 
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
 
     //glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -112,10 +112,10 @@ int graphicsInit() {
 
     const float screenQuad[] = {
         //positions     //texture coordinates
-        -1.0f, -1.0f,   0.0f, 0.0f,
-        -1.0f,  1.0f,   0.0f, 1.0f,
-         1.0f,  1.0f,   1.0f, 1.0f,
-         1.0f, -1.0f,   1.0f, 0.0f
+        -1.0f, -1.0f,   0.0f, 1.0f,
+        -1.0f,  1.0f,   0.0f, 0.0f,
+         1.0f,  1.0f,   1.0f, 0.0f,
+         1.0f, -1.0f,   1.0f, 1.0f
     };
     const unsigned int indices[] = {
         0, 1, 3,
