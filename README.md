@@ -4,7 +4,7 @@ A CHIP-8 interpreter written in C, using OpenGL and GLFW for cross-platform rend
 
 ## Installation, Compilation, and Execution
 
-⚠️ **Windows Users:** You need `gcc`, `make`, and other basic GNU tools (like `mkdir` and `rm`) to be able to compile the source files using make.  
+⚠️ **Windows Users:** You need `gcc`, `make`, and other basic GNU tools (like `mkdir` and `rm`) to be able to compile the source files using `make`.  
 Install them easily using [MSYS2](https://www.msys2.org/).
 
 ### Steps
