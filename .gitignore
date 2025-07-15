@@ -1,7 +1,10 @@
 # .gitignore
+./bin/*
+./build/*
 *.exe
+*.out
 *.o
 .vscode/*
-.roms/*
+./roms/*
 *.ch8
 *.txt

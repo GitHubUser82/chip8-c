@@ -8,7 +8,13 @@
 #include <input.h>
 #include <chip8.h>
 
-#include <windows.h>
+#ifdef _WIN32
+    #include <windows.h>
+
+#elif defined(__linux__)
+    #include <unistd.h>
+
+#endif
 
 
 /*TO DO:
@@ -50,7 +56,11 @@ int main(int argc, char* argv[]) {
         double sleepTime = 1.0/TARGET_FPS - elapsed;
         if (sleepTime > 0.0)
             //glfwWaitEventsTimeout(sleepTime);
-            Sleep(sleepTime * 1000);
+            #ifdef _WIN32
+                Sleep(sleepTime * 1000);
+            #elif defined(__linux__)
+                sleep(sleepTime);
+            #endif
 
     }
 

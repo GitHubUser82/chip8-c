@@ -1,10 +1,17 @@
 #include <glad.h>
 #include <glfw3.h>
-#include <windows.h>
 
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+
+#ifdef _WIN32
+    #include <windows.h>
+
+#elif defined(__linux__)
+    #include <unistd.h>
+
+#endif
 
 #include <shader_manager.h>
 #include <input.h>

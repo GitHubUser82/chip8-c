@@ -2,19 +2,18 @@
 
 A CHIP-8 interpreter written in C, using OpenGL and GLFW for cross-platform rendering, window creation, and input handling.
 
-## Table of Contents
+## Installation, Compilation, and Execution
 
-- [Installation and Execution](#installation-and-execution)
+⚠️ **Windows Users:** You need `gcc`, `make`, and other basic GNU tools (like `mkdir` and `rm`).  
+Install them easily using [MSYS2](https://www.msys2.org/).
 
-## Installation and Execution
-
-⚠️ Currently, only **Windows** is supported. `gcc` and `make` required.  
-You can install them easily on Windows using [MSYS2](https://www.msys2.org/).
-
-### Steps:
+### Steps
 
 ```bash
 git clone https://github.com/GitHubUser82/chip8-c
 cd chip8-c
-make
+make PLATFORM
 .\bin\chip8_interpreter.exe .\roms\rom-name.ch8
+```
+- Replace PLATFORM with your target (e.g., windows, linux, or macos) if your Makefile supports platform-specific builds.
+- Replace rom-name.ch8 with the actual name of the ROM file you want to run.

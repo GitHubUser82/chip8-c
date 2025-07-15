@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <glfw3.h>
 
 extern const double TARGET_FPS;
