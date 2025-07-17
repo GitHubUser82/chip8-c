@@ -55,7 +55,8 @@ typedef struct {
     uint8_t  sound_timer;
     bool     keypad[16]; //Input
     bool     screen[CHIP8_DISPLAY_HEIGHT][CHIP8_DISPLAY_WIDTH]; //Display buffer
-    bool waitingForKey;
+    bool     waitingForKey;
+    int      keyPressedDuringHalt; //the last key that was pressed while the interpreter was halted (in "waitingForKey" state)
 } Chip8State;
 static Chip8State state;
 
@@ -71,6 +72,7 @@ int chip8Init(const char* filepath) {
     state.delay_timer = 0;
     state.sound_timer = 0;
     state.waitingForKey = false;
+    state.keyPressedDuringHalt = -1;
     memcpy(state.memory+FONT_DATA_POSITION, fontData, sizeof(fontData));
     clearChip8Screen();
     return loadFileToMemory(filepath);
@@ -108,6 +110,21 @@ static void clearChip8Screen() {
 }
 
 static int executeInstruction() {
+
+    static double lastTick = -1.0;
+    if (lastTick<0) //we would otherwise be force to intialize lastTick to a constant value, if this trick is not used
+        lastTick=glfwGetTime();
+    double elaspedTime;
+    if (!state.waitingForKey)  
+        elaspedTime = glfwGetTime() - lastTick;
+    if (elaspedTime>=1.0/60.0) {
+        if (state.delay_timer>0)
+            state.delay_timer--;
+        if (state.sound_timer>0)
+            state.sound_timer--;
+        lastTick += 1.0/60.0;
+    }
+
 
     if (state.PC >= CHIP8_MEMORY_SIZE - 1) {
         fprintf(stderr, "[chip8] ERROR: attempt to read from an invalid memory address (out of bounds)\n");
@@ -180,7 +197,6 @@ static int executeInstruction() {
         case 0x4:
             if (state.V[x]!=nn)
                 state.PC+=2;
-
             break;
 
         case 0x5:
@@ -200,43 +216,47 @@ static int executeInstruction() {
 
         case 0x8:
             switch(n) {
-                case 0:
+                case 0x0:
                     state.V[x]=state.V[y];
                     break;
-                case 1:
+                case 0x1:
                     state.V[x]|=state.V[y];
                     break;
-                case 2:
+                case 0x2:
                     state.V[x]&=state.V[y];
                     break;
-                case 3:
+                case 0x3:
                     state.V[x]^=state.V[y];
                     break;
-                case 4:
+                case 0x4:
                     uint16_t result = state.V[x] + state.V[y];
+                    state.V[x] = (uint8_t) result;
                     if (result>255)
                         state.V[0xF]=1;
                     else
                         state.V[0xF]=0;
-                    state.V[x] = (uint8_t) result;
                     break;
-                case 5:
-                    state.V[0xF] = (state.V[x] >= state.V[y]) ? 1 : 0;
-                    state.V[x] = state.V[x] - state.V[y];                 
+                case 0x5:
+                    uint8_t tmp1 = state.V[x];
+                    state.V[x] = state.V[x] - state.V[y];
+                    state.V[0xF] = (tmp1 >= state.V[y]) ? 1 : 0;             
                     break;
-                case 7:
-                    state.V[0xF] = (state.V[y] >= state.V[x]) ? 1 : 0;
-                    state.V[x] = state.V[y] - state.V[x];               
-                    break;
-                case 6: //right shift
+                case 0x6: //right shift
                     //state.V[x]=state.V[y];
-                    state.V[0xF]=state.V[x]&0b00000001;
+                    uint8_t tmp2 = state.V[x];
                     state.V[x]>>=1;
+                    state.V[0xF]=tmp2 & 0b00000001;
                     break;
+                case 0x7:
+                    state.V[x] = state.V[y] - state.V[x];               
+                    state.V[0xF] = (state.V[y] >= state.V[x]) ? 1 : 0;
+                    break;
+
                 case 0xE: //left shift
                     //state.V[x]=state.V[y];
-                    state.V[0xF]=state.V[x]>>7;
+                    uint8_t tmp3 = state.V[x];
                     state.V[x]<<=1;
+                    state.V[0xF]=tmp3 >> 7;
                     break;
             }
             break;
@@ -305,18 +325,30 @@ static int executeInstruction() {
                 state.sound_timer=state.V[x];
             else if (nn==0x1E)
                 state.I+=state.V[x];
-            //On the original COSMAC VIP, the key was only registered when it was pressed and then released.
             else if (nn==0x0A) {
-                state.waitingForKey = true;
-                for (int i=0; i<16; i++) {
-                    if (state.keypad[i]==true) {
-                        state.waitingForKey = false;
-                        state.V[x] = i;
-                        break;
-                    }
-                }
-                if (state.waitingForKey)
+
+                if (state.waitingForKey==false) {
+                    state.waitingForKey=true;
+                    state.keyPressedDuringHalt=(-1);
                     state.PC-=2;
+                }
+                else {
+                    state.PC-=2;
+                    if (state.keyPressedDuringHalt==-1) {
+                        for (int i=0; i<16; i++) {
+                            if (state.keypad[i]==true) {
+                                state.keyPressedDuringHalt = i;
+                                state.V[x] = i;
+                                break;
+                            }
+                        }
+                    }
+                    if (state.keypad[state.keyPressedDuringHalt]==false)
+                        state.waitingForKey = false;
+                        state.keyPressedDuringHalt = -1;
+                        state.PC+=2;
+                }
+
             }
             else if (nn==0x29) {
                 state.I = FONT_DATA_POSITION + (state.V[x]&((uint8_t)0x0F)) * 5;
@@ -369,21 +401,6 @@ void chip8UpdateKeypadState(bool keys[16]) {
 }
 
 int chip8Update() {
-
-    static double lastTick = -1.0;
-    if (lastTick<0) //we would otherwise be force to intialize lastTick to a constant value, if this trick is not used
-        lastTick=glfwGetTime();
-    double elaspedTime;
-    if (!state.waitingForKey)  
-        elaspedTime = glfwGetTime() - lastTick;
-    if (elaspedTime>=1.0/60.0) {
-        if (state.delay_timer>0)
-            state.delay_timer--;
-        if (state.sound_timer>0)
-            state.sound_timer--;
-        lastTick += 1.0/60.0;
-    }
-    
     if (executeInstructions((int)INSTRUCTIONS_PER_SECOND/TARGET_FPS) != 0)
         return 1;
     return 0;

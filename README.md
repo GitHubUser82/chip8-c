@@ -12,8 +12,9 @@ Install them easily using [MSYS2](https://www.msys2.org/).
 ```bash
 git clone https://github.com/GitHubUser82/chip8-c
 cd chip8-c
-make PLATFORM
-.\bin\chip8_interpreter.exe .\roms\rom-name.ch8
+make <PLATFORM\>
+.\bin\<EXECUTABLE_NAME\> .\roms\<ROM_NAME\>
 ```
-- Replace PLATFORM with your target (e.g., windows, linux, or macos) if your Makefile supports platform-specific builds.
-- Replace rom-name.ch8 with the actual name of the ROM file you want to run.
+- Replace <PLATFORM> with your compilation target (windows or linux)
+- Replace <EXECUTABLE_NAME> with the name of the executable (chip8_interpreter.exe on Windows and chip8_interpreter on Linux by default)
+- Replace <ROM_NAME> with the name of the CHIP-8 ROM you want to execute
