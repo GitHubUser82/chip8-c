@@ -13,8 +13,8 @@ Install them easily using [MSYS2](https://www.msys2.org/).
 git clone https://github.com/GitHubUser82/chip8-c
 cd chip8-c
 make PLATFORM
-.\bin\EXECUTABLE_NAME .\\roms\\ROM_NAME
+.\bin\EXECUTABLE_NAME .\roms\ROM_NAME
 ```
-- Replace PLATFORM with your target OS (windows or linux)
-- Replace EXECUTABLE_NAME with the name of the generated executable (chip8_interpreter.exe on Windows and chip8_interpreter.out on Linux by default)
-- Replace ROM_NAME with the name of the CHIP-8 ROM you want to execute
+- Replace **PLATFORM** with your target OS (windows or linux)
+- Replace **EXECUTABLE_NAME** with the name of the generated executable (chip8_interpreter.exe on Windows and chip8_interpreter.out on Linux by default)
+- Replace **ROM_NAME** with the name of the CHIP-8 ROM you want to execute
