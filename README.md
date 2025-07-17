@@ -9,20 +9,19 @@ Install them easily using [MSYS2](https://www.msys2.org/).
 
 ### Steps
 
+
 Install and compile with
 ```bash
 git clone https://github.com/GitHubUser82/chip8-c
 cd chip8-c
-make PLATFORM
+make PLATFORM   # replace PLATFORM with Windows or Linux 
 ```
 Then use the produced executable to run a CHIP-8 ROM with
 ```bash
-.\bin\EXECUTABLE_NAME .\roms\ROM_NAME   # on Windows
-./bin/EXECUTABLE_NAME ./roms/ROM_NAME   # on Linux
+.\bin\chip8_interpreter.exe .\roms\ROM_NAME   # on Windows
+./bin/chip8_interpreter.out ./roms/ROM_NAME   # on Linux
 ```
-- Replace **PLATFORM** with your target OS (windows or linux)
-- Replace **EXECUTABLE_NAME** with the name of the generated executable (chip8_interpreter.exe on Windows and chip8_interpreter.out on Linux by default)
-- Replace **ROM_NAME** with the name of the CHIP-8 ROM you want to execute
+(Replace **ROM_NAME** with the name of the ROM you want to run)
 
 ## Input
 The original computer for which CHIP-8 was built (the COSMAC VIP) had a hexadecimal keypad that looked like this:
