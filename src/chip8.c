@@ -10,6 +10,8 @@
 
 static void clearChip8Screen();
 static int loadFileToMemory(const char*);
+void dumpMemory(void);
+void generateTraceLog(const char*, int);
 
 
 #define CHIP8_DISPLAY_WIDTH 64
@@ -88,6 +90,8 @@ static int loadFileToMemory(const char* filepath) {
     
     fclose(fp);
 
+    dumpMemory();
+
     return 0;
 }
 
@@ -110,26 +114,31 @@ static int executeInstruction() {
         return 1;
     }
 
-    uint8_t instruction[2] = {state.memory[state.PC], state.memory[state.PC+1]};
-    state.PC += 2;
 
-    uint8_t opcode; //first nibble (4 bits)
+
+    uint8_t instruction[2] = {state.memory[state.PC], state.memory[state.PC+1]};
+    //uint16_t opcode = instruction[0] + instruction[1]<<8;
+    uint16_t opcode = (instruction[0] << 8) | instruction[1];
+
+    uint8_t first_nibble; //first nibble (4 bits)
     uint8_t x;
     uint8_t y;
     uint8_t n;
     uint8_t nn;
     uint16_t nnn;
     
-    opcode = instruction[0] >> 4;
+    first_nibble = instruction[0] >> 4;
     x = instruction[0] & 0x0F;
     y = instruction[1] >> 4;
     n = instruction[1] & 0x0F;
     nn = instruction[1];
     nnn = ((instruction[0] & 0x0F) << 8) | instruction[1];
 
-    /* WARNING: some cases, by only checking the first nibble, my allow some undefined instructions,
-    so more checking needs to be added later*/    
-    switch (opcode) {
+    //generateTraceLog("tracelog", opcode);
+
+    state.PC += 2;
+
+    switch (first_nibble) {
 
         case 0x0:
             if(nnn==0x0E0) {
@@ -220,13 +229,11 @@ static int executeInstruction() {
                     state.V[x] = state.V[y] - state.V[x];               
                     break;
                 case 6: //right shift
-                    //modern version
                     //state.V[x]=state.V[y];
                     state.V[0xF]=state.V[x]&0b00000001;
                     state.V[x]>>=1;
                     break;
                 case 0xE: //left shift
-                    //modern version
                     //state.V[x]=state.V[y];
                     state.V[0xF]=state.V[x]>>7;
                     state.V[x]<<=1;
@@ -290,11 +297,11 @@ static int executeInstruction() {
             break;
 
         case 0xF:
-            if (nn==07)
+            if (nn==0x07)
                 state.V[x]=state.delay_timer;
-            else if (nn==15)
+            else if (nn==0x15)
                 state.delay_timer=state.V[x];
-            else if (nn==18)
+            else if (nn==0x18)
                 state.sound_timer=state.V[x];
             else if (nn==0x1E)
                 state.I+=state.V[x];
@@ -311,28 +318,30 @@ static int executeInstruction() {
                 if (state.waitingForKey)
                     state.PC-=2;
             }
-            else if (nn==29) {
-                state.I=FONT_DATA_POSITION + (state.V[x]&0x000F) * 5;
+            else if (nn==0x29) {
+                state.I = FONT_DATA_POSITION + (state.V[x]&((uint8_t)0x0F)) * 5;
             }
-            else if (nn==33) {
-                if (state.I+2>=CHIP8_MEMORY_SIZE) {
+            else if (nn==0x33) {
+                /* if (state.I+2>=CHIP8_MEMORY_SIZE) {
                     fprintf(stderr, "[chip8] ERROR: attempt to write out of memory bounds\n");
                     return 1;
-                }
+                } */
                 uint8_t n = state.V[x];
                 state.memory[state.I]=n/100;
                 state.memory[state.I+1]=(n/10)%10;
                 state.memory[state.I+2]=n%10;
             }
-            else if (nn==55) {
+            else if (nn==0x55) {
                 for (int k=0; k<=x; k++) {
                     state.memory[state.I+k] = state.V[k];
                 }
+                state.I+=(x+1);
             }
-            else if (nn==65) {
+            else if (nn==0x65) {
                 for (int k=0; k<=x; k++) {
                     state.V[k]=state.memory[state.I+k];
                 }
+                state.I+=(x+1);
             }
             break;
 
@@ -378,7 +387,26 @@ int chip8Update() {
     if (executeInstructions((int)INSTRUCTIONS_PER_SECOND/TARGET_FPS) != 0)
         return 1;
     return 0;
-} 
+}
+
+void dumpMemory() {
+    FILE* fp = fopen("memorydump", "w");
+    fwrite(state.memory, 1, CHIP8_MEMORY_SIZE, fp);
+    fclose(fp);
+}
+
+void generateTraceLog(const char* filepath, int opcode) {
+    static FILE* fp = NULL;
+    static int nbCycles = 0;
+    if (fp==NULL) {
+        fp = fopen(filepath, "a");
+    }
+    //[01:0000] V0:00 V1:00 V2:00 V3:00 V4:00 V5:00 V6:00 V7:00 V8:00 V9:00 VA:00 VB:00 VC:00 VD:00 VE:00 VF:00 I:0000 SP:0 PC:0200 O:120a
+    fprintf(fp, "[fn:%04x] V0:%02x V1:%02x V2:%02x V3:%02x V4:%02x V5:%02x V6:%02x V7:%02x V8:%02x V9:%02x VA:%02x VB:%02x VC:%02x VD:%02x VE:%02x VF:%02x I:%04x SP:%0x PC:%04x O:%04x\n", nbCycles, state.V[0],
+    state.V[1], state.V[2], state.V[3], state.V[4], state.V[5], state.V[6], state.V[7], state.V[8], state.V[9], state.V[10], state.V[11], state.V[12], state.V[13], state.V[14], state.V[15],
+    state.I, state.SP, state.PC, opcode);
+    nbCycles+=1;
+}
 
 /* void randomizeScreen() {
     for (int i=0; i<CHIP8_DISPLAY_HEIGHT; i++) {
