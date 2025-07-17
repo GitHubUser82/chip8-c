@@ -27,23 +27,28 @@ Then use the produced executable to run a CHIP-8 ROM with
 ## Input
 The original computer for which CHIP-8 was built (the COSMAC VIP) had a hexadecimal keypad that looked like this:
 
+```
 1 2 3 C
 4 5 6 D
 7 8 9 E
 A 0 B F
+```
 
 Modern CHIP-8 interpreters use the 16 keys in the upper-right section of a standard keyboard to emulate the original hexadecimal keypad.
 
 For a QWERTY keyboard, these are:
-
+```
 1 2 3 4
 Q W E R
 A S D F
 Z X C V
+```
 
 For an AZERTY keyboard, these are:
 
+```
 1 2 3 4
 A Z E R
 Q S D F
 W X C V
+```
