@@ -34,7 +34,7 @@ The original computer for which CHIP-8 was built (the COSMAC VIP) had a hexadeci
 A 0 B F
 ```
 
-Modern CHIP-8 interpreters use the 16 keys in the upper-right section of a standard keyboard to emulate the original hexadecimal keypad.
+Modern CHIP-8 interpreters use the 16 keys in the upper-left section of a standard keyboard to emulate the original hexadecimal keypad.
 
 For a QWERTY keyboard, these are:
 ```
