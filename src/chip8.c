@@ -61,6 +61,13 @@ static Chip8State state;
 int chip8Init(const char* filepath) {
     state.PC = STARTING_MEMORY_ADDRESS;
     state.SP = 0;
+    state.I = 0;
+    for (int i=0; i<16; i++) {
+        state.V[i]=0;
+        state.stack[i]=0;
+    }
+    state.delay_timer = 0;
+    state.sound_timer = 0;
     state.waitingForKey = false;
     memcpy(state.memory+FONT_DATA_POSITION, fontData, sizeof(fontData));
     clearChip8Screen();
@@ -71,12 +78,13 @@ static int loadFileToMemory(const char* filepath) {
 
     FILE* fp = fopen(filepath, "rb");
     if (!fp) {
-        fprintf(stderr, "[chip8] ERROR: could not open specified file");
+        fprintf(stderr, "[chip8] ERROR: could not open specified file\n");
         return 1;
     }
 
-    //size_t nbOfBytesRead = fread(state.memory+STARTING_MEMORY_ADDRESS, 1, CHIP8_MEMORY_SIZE-STARTING_MEMORY_ADDRESS, fp);
-    fread(state.memory+STARTING_MEMORY_ADDRESS, 1, CHIP8_MEMORY_SIZE-STARTING_MEMORY_ADDRESS, fp);
+    size_t nbOfBytesRead = fread(state.memory+STARTING_MEMORY_ADDRESS, 1, CHIP8_MEMORY_SIZE-STARTING_MEMORY_ADDRESS, fp);
+    if (nbOfBytesRead>=CHIP8_MEMORY_SIZE-STARTING_MEMORY_ADDRESS)
+        fprintf(stderr, "[chip8] WARNING: ROM size too big for memory\n");
     
     fclose(fp);
 
@@ -167,8 +175,10 @@ static int executeInstruction() {
             break;
 
         case 0x5:
-            if (state.V[x]==state.V[y])
-                state.PC+=2;
+            if (n==0) {
+                if (state.V[x]==state.V[y])
+                    state.PC+=2;
+            }
             break;
 
         case 0x6:
@@ -209,24 +219,26 @@ static int executeInstruction() {
                     state.V[0xF] = (state.V[y] >= state.V[x]) ? 1 : 0;
                     state.V[x] = state.V[y] - state.V[x];               
                     break;
-                case 6: //left shift
-                    //original COSMAC VIP version
-                    state.V[x]=state.V[y];
+                case 6: //right shift
+                    //modern version
+                    //state.V[x]=state.V[y];
                     state.V[0xF]=state.V[x]&0b00000001;
-                    state.V[x]<<=1;
-                    break;
-                case 0xE: //right shift
-                    //original COSMAC VIP version
-                    state.V[x]=state.V[y];
-                    state.V[0xF]=state.V[x]>>7;
                     state.V[x]>>=1;
+                    break;
+                case 0xE: //left shift
+                    //modern version
+                    //state.V[x]=state.V[y];
+                    state.V[0xF]=state.V[x]>>7;
+                    state.V[x]<<=1;
                     break;
             }
             break;
 
         case 0x9:
-            if (state.V[x]!=state.V[y])
-                state.PC+=2;
+            if (n==0) {
+                if (state.V[x]!=state.V[y])
+                    state.PC+=2;
+            }
             break;
 
         case 0xA:
@@ -305,22 +317,21 @@ static int executeInstruction() {
             else if (nn==33) {
                 if (state.I+2>=CHIP8_MEMORY_SIZE) {
                     fprintf(stderr, "[chip8] ERROR: attempt to write out of memory bounds\n");
+                    return 1;
                 }
-                uint16_t n = state.V[x];
+                uint8_t n = state.V[x];
                 state.memory[state.I]=n/100;
                 state.memory[state.I+1]=(n/10)%10;
                 state.memory[state.I+2]=n%10;
             }
             else if (nn==55) {
-                //modern implementation
-                for (int i=0; i<=x; i++) {
-                    state.memory[state.I + i] = state.V[i];
+                for (int k=0; k<=x; k++) {
+                    state.memory[state.I+k] = state.V[k];
                 }
             }
             else if (nn==65) {
-                //modern implementation
-                for (int i=0; i<=x; i++) {
-                    state.V[i]=state.memory[state.I + i];
+                for (int k=0; k<=x; k++) {
+                    state.V[k]=state.memory[state.I+k];
                 }
             }
             break;
