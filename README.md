@@ -8,14 +8,22 @@ A CHIP-8 interpreter written in C, using OpenGL and GLFW for cross-platform rend
 ![Tetris screenshot](images/tetris.png "tetris.png")
 *Tetris*
 
+<br>
+
 ![Pong screenshot](images/pong.png "pong.png")
 *Pong*
+
+<br>
 
 ![Space Invaders screenshot](images/space-invaders.png "space-invaders.png")
 *Space Invaders*
 
+<br>
+
 ![Breakout screenshot](images/breakout.png "breakout.png")
 *Breakout*
+
+<br>
 
 
 ## Installation, compilation, and execution
