@@ -92,8 +92,6 @@ static int loadFileToMemory(const char* filepath) {
     
     fclose(fp);
 
-    dumpMemory();
-
     return 0;
 }
 

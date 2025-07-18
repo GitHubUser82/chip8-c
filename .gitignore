@@ -5,7 +5,6 @@
 *.out
 *.o
 .vscode/*
-./roms/*
-*.ch8
 *.txt
 memorydump
+tracelog
