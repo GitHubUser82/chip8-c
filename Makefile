@@ -17,11 +17,11 @@ linux: $(BIN_DIR)/$(LINUX_PROG)
 
 $(BIN_DIR)/$(WINDOWS_PROG): $(WINDOWS_OBJ)
 	mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ $^ -Iinclude -L$(LIB_DIR) -lglfw3_windows -lopengl32 -lgdi32
+	$(CC) $(CFLAGS) -o $@ $^ -Iinclude -L$(LIB_DIR) -lglfw3_windows -lopengl32 -lgdi32 -mwindows
 
 $(BIN_DIR)/$(LINUX_PROG): $(LINUX_OBJ)
 	mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ $^ -Iinclude -L$(LIB_DIR) -lglfw3_linux -lm -lGL -lpthread -ldl
+	$(CC) $(CFLAGS) -o $@ $^ -Iinclude -L$(LIB_DIR) -lglfw3_linux -lm -lGL -lpthread
 
 $(BUILD_DIR)/%_WINDOWS.o: $(SRC_DIR)/%.c
 	$(CC) -c $< -o $@ -Iinclude

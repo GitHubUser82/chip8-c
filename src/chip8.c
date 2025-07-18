@@ -45,18 +45,18 @@ const uint8_t fontData[] = {
 };
 
 typedef struct {
-    uint8_t  V[16]; //General purpose registers
-    uint16_t I; //Index register
-    uint16_t PC; //Program counter
-    uint8_t  SP; //Stack pointer
-    uint16_t stack[16]; //Stack
+    uint8_t  V[16]; //general purpose registers
+    uint16_t I; //index register
+    uint16_t PC; //srogram counter
+    uint8_t  SP; //stack pointer
+    uint16_t stack[16]; //stack
     uint8_t  memory[CHIP8_MEMORY_SIZE]; //RAM
     uint8_t  delay_timer;
     uint8_t  sound_timer;
-    bool     keypad[16]; //Input
-    bool     screen[CHIP8_DISPLAY_HEIGHT][CHIP8_DISPLAY_WIDTH]; //Display buffer
-    bool     waitingForKey;
-    int      keyPressedDuringHalt; //the last key that was pressed while the interpreter was halted (in "waitingForKey" state)
+    bool     keypad[16]; //keypad state (true: key is in "pressed" state)
+    bool     screen[CHIP8_DISPLAY_HEIGHT][CHIP8_DISPLAY_WIDTH]; //display buffer
+    bool     isHalted; //the machine is waiting for a key to be pressed then released to resume its execution
+    int      keyPressedDuringHalt; //the last key that was pressed while the interpreter was halted (in "isHalted" state)
 } Chip8State;
 static Chip8State state;
 
@@ -71,7 +71,7 @@ int chip8Init(const char* filepath) {
     }
     state.delay_timer = 0;
     state.sound_timer = 0;
-    state.waitingForKey = false;
+    state.isHalted = false;
     state.keyPressedDuringHalt = -1;
     memcpy(state.memory+FONT_DATA_POSITION, fontData, sizeof(fontData));
     clearChip8Screen();
@@ -115,7 +115,7 @@ static int executeInstruction() {
     if (lastTick<0) //we would otherwise be force to intialize lastTick to a constant value, if this trick is not used
         lastTick=glfwGetTime();
     double elaspedTime;
-    if (!state.waitingForKey)  
+    if (!state.isHalted)  
         elaspedTime = glfwGetTime() - lastTick;
     if (elaspedTime>=1.0/60.0) {
         if (state.delay_timer>0)
@@ -182,10 +182,8 @@ static int executeInstruction() {
                 return 1;
                 break;
             }
-            //pushes current PC to stack
             state.stack[state.SP]=state.PC;
             state.SP++;
-            //modifies PC
             state.PC=nnn;
             break;
 
@@ -273,7 +271,6 @@ static int executeInstruction() {
             break;
 
         case 0xB:
-            //original COSMAC VIP version
             state.PC=nnn+state.V[0];
             break;
 
@@ -327,26 +324,37 @@ static int executeInstruction() {
                 state.I+=state.V[x];
             else if (nn==0x0A) {
 
-                if (state.waitingForKey==false) {
-                    state.waitingForKey=true;
-                    state.keyPressedDuringHalt=(-1);
+                if (state.isHalted == false) {
+                    state.isHalted=true;
+                    state.keyPressedDuringHalt=-1;
                     state.PC-=2;
+                    break;
                 }
-                else {
-                    state.PC-=2;
-                    if (state.keyPressedDuringHalt==-1) {
-                        for (int i=0; i<16; i++) {
-                            if (state.keypad[i]==true) {
-                                state.keyPressedDuringHalt = i;
-                                state.V[x] = i;
-                                break;
-                            }
+
+                if (state.keyPressedDuringHalt == -1) {
+                    for (int i=0; i<16; i++) {
+                        if (state.keypad[i]==true) {
+                            state.keyPressedDuringHalt=i;
+                            break;
                         }
                     }
-                    if (state.keypad[state.keyPressedDuringHalt]==false)
-                        state.waitingForKey = false;
+                    state.PC-=2;
+                    break;
+                }
+
+                if (state.keyPressedDuringHalt<0) {
+                    fprintf(stderr, "[chip8] ERROR: %d is an invalid value for state.keyPressedDuringHalt", state.keyPressedDuringHalt);
+                    return 1;
+                }
+                else {
+                    if (state.keypad[state.keyPressedDuringHalt] == false) {
+                        state.isHalted == false;
+                        state.V[x] = state.keyPressedDuringHalt;
                         state.keyPressedDuringHalt = -1;
-                        state.PC+=2;
+                    }
+                    else {
+                        state.PC-=2;
+                    }
                 }
 
             }
@@ -424,31 +432,3 @@ void generateTraceLog(const char* filepath, int opcode) {
     state.I, state.SP, state.PC, opcode);
     nbCycles+=1;
 }
-
-/* void randomizeScreen() {
-    for (int i=0; i<CHIP8_DISPLAY_HEIGHT; i++) {
-        for (int j=0; j<CHIP8_DISPLAY_WIDTH; j++) {
-            screen[i][j]=(bool)(rand()%2);
-        }
-    }
-} */
-
-/* static void printScreenToConsole() {
-    for (int i=0; i<CHIP8_DISPLAY_HEIGHT; i++) {
-        for (int j=0; j<CHIP8_DISPLAY_WIDTH; j++) {
-            printf("%d", (int)screen[i][j]);
-        }
-        printf("\n");
-    }
-} */
-
-//prints 32 memory bytes per line
-/* static void printMemoryToConsole() {
-    for (int i=0; i<CHIP8_MEMORY_SIZE;) {
-        for (int j=0; j<32; j++) {
-            printf("%x ", state.memory[i]);
-            i++;
-        }
-        printf("\n");
-    }
-} */
