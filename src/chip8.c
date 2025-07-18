@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <time.h>
 
 #include <graphics.h>
 
@@ -75,6 +76,7 @@ int chip8Init(const char* filepath) {
     state.keyPressedDuringHalt = -1;
     memcpy(state.memory+FONT_DATA_POSITION, fontData, sizeof(fontData));
     clearChip8Screen();
+    srand(time(NULL));
     return loadFileToMemory(filepath);
 }
 

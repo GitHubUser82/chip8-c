@@ -2,13 +2,22 @@
 
 A CHIP-8 interpreter written in C, using OpenGL and GLFW for cross-platform rendering, window creation, and input handling.
 
+
+## Screenshots
+
+![Tetris screenshot](image/ "tetris.ch8")
+![Pong screenshot](image/ "pong.ch8")
+![Space Invaders screenshot](image/ "space-invaders.ch8")
+![Breakout screenshot](image/ "breakout.ch8")
+
+
 ## Installation, compilation, and execution
 
 ⚠️ **Windows Users:** You need `gcc`, `make`, and other basic GNU tools (like `mkdir` and `rm`) to be able to compile the source files using `make`.  
 Install them easily using [MSYS2](https://www.msys2.org/).
 
-### Steps
 
+### Steps
 
 Install and compile with
 ```bash
@@ -23,7 +32,9 @@ Then use the produced executable to run a CHIP-8 ROM with
 ```
 (Replace **ROM_NAME** with the name of the ROM you want to run)
 
+
 ## Input
+
 The original computer for which CHIP-8 was built (the COSMAC VIP) had a hexadecimal keypad that looked like this:
 
 ```
