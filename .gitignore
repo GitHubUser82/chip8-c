@@ -5,6 +5,5 @@
 *.out
 *.o
 .vscode/*
-*.txt
 memorydump
 tracelog

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -O2
 SRC_DIR = src
 BUILD_DIR = build
 BIN_DIR = bin
@@ -24,10 +24,10 @@ $(BIN_DIR)/$(LINUX_PROG): $(LINUX_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ -Iinclude -L$(LIB_DIR) -lglfw3_linux -lm -lGL -lpthread
 
 $(BUILD_DIR)/%_WINDOWS.o: $(SRC_DIR)/%.c
-	$(CC) -c $< -o $@ -Iinclude
+	$(CC) $(FLAGS) -c $< -o $@ -Iinclude
 
 $(BUILD_DIR)/%_LINUX.o: $(SRC_DIR)/%.c
-	$(CC) -c $< -o $@ -Iinclude
+	$(CC) $(FLAGS) -c $< -o $@ -Iinclude
 	
 clean:
 	rm -rfv $(BUILD_DIR)/* $(BIN_DIR)/*
