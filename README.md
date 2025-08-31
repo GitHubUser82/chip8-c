@@ -38,7 +38,7 @@ Install and compile with
 ```bash
 git clone https://github.com/GitHubUser82/chip8-c
 cd chip8-c
-make PLATFORM   # replace PLATFORM with Windows or Linux 
+make PLATFORM   # replace PLATFORM with windows or linux 
 ```
 Then use the produced executable to run a CHIP-8 ROM with
 ```bash
