@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
             #ifdef _WIN32
                 Sleep(sleepTime * 1000);
             #elif defined(__linux__)
-                sleep(sleepTime);
+                usleep(sleepTime * 1000 * 1000);
             #endif
 
     }

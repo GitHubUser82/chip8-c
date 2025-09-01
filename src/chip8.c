@@ -23,7 +23,7 @@ void generateTraceLog(const char*, int);
 
 #define STACK_SIZE 16 //number of shorts (16-bit values)
 
-#define INSTRUCTIONS_PER_SECOND 500
+#define INSTRUCTIONS_PER_SECOND 1000
 
 #define FONT_DATA_POSITION 0x050
 const uint8_t fontData[] = {
@@ -114,7 +114,7 @@ static int executeInstruction() {
     static double lastTick = -1.0;
     if (lastTick<0) //we would otherwise be force to intialize lastTick to a constant value, if this trick is not used
         lastTick=glfwGetTime();
-    double elaspedTime;
+    double elaspedTime = 0;
     if (!state.isHalted)  
         elaspedTime = glfwGetTime() - lastTick;
     if (elaspedTime>=1.0/60.0) {
@@ -134,8 +134,6 @@ static int executeInstruction() {
 
 
     uint8_t instruction[2] = {state.memory[state.PC], state.memory[state.PC+1]};
-    //uint16_t opcode = instruction[0] + instruction[1]<<8;
-    uint16_t opcode = (instruction[0] << 8) | instruction[1];
 
     uint8_t first_nibble; //first nibble (4 bits)
     uint8_t x;
@@ -348,7 +346,7 @@ static int executeInstruction() {
                 }
                 else {
                     if (state.keypad[state.keyPressedDuringHalt] == false) {
-                        state.isHalted == false;
+                        state.isHalted = false;
                         state.V[x] = state.keyPressedDuringHalt;
                         state.keyPressedDuringHalt = -1;
                     }
