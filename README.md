@@ -28,9 +28,19 @@ A CHIP-8 interpreter written in C, using OpenGL and GLFW for cross-platform rend
 
 ## Installation, compilation, and execution
 
-⚠️ **Windows Users:** You need `gcc`, `make`, and other basic GNU tools (like `mkdir` and `rm`) to be able to compile the source files using `make`.  
-Install them easily using [MSYS2](https://www.msys2.org/).
-
+> ⚠️ **Windows Users:** You need `gcc`, `make`, and other basic GNU tools (like `mkdir` and `rm`) to be able to compile the source files using `make`.  
+> Install them easily using [MSYS2](https://www.msys2.org/).
+>
+> Executables built with **MSYS2 MinGW-w64** (a Windows port of the GCC compiler) also depend on a few runtime DLLs that are **not included in Windows by default**:
+>
+> - `libstdc++-6.dll`  
+> - `libgcc_s_seh-1.dll`  
+> - `libwinpthread-1.dll`  
+>
+> These DLLs are available in your MSYS2 installation under:  
+> `C:\msys64\mingw64\bin\`
+>
+> If you want to run the executable on another Windows machine that does not have MSYS2 installed, copy these DLLs into the same folder as your `.exe` (or provide them alongside your distribution).
 
 ### Steps
 
