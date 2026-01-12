@@ -1,5 +1,7 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -O2
+CC = clang
+#CFLAGS = -Wall -Wextra -O2 
+# Other flags (clang): -std=c++17 -Weverything -Wno-c++98-compat-pedantic -Wno-unused-function
+CFLAGS = -Weverything
 SRC_DIR = src
 BUILD_DIR = build
 BIN_DIR = bin

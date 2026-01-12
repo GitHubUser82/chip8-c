@@ -1,10 +1,16 @@
 # .gitignore
+
 ./bin/*
 ./build/*
 *.exe
 *.out
 *.o
+
 .vscode/*
+
 memorydump
 tracelog
+
 compile_commands.json
+.clang*
+.cache
