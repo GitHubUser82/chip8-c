@@ -12,7 +12,14 @@ SRC = $(wildcard $(SRC_DIR)/*.c)
 WINDOWS_OBJ = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%_WINDOWS.o, $(SRC))
 LINUX_OBJ = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%_LINUX.o, $(SRC))
 
-.PHONY: windows linux clean all
+.PHONY: clean
+
+# default target when none is specified (i.e. when the user runs "make" without any parameter)
+.DEFAULT_GOAL := help
+
+# the @ symbol makes the command silent (only the string following echo will be printed, not the command "echo [string]" itself)
+help:
+	@echo "Please specify one of the following targets: linux, windows."
 
 linux: $(BIN_DIR)/$(LINUX_PROG)
 
