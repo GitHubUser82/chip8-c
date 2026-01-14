@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glfw3.h>
-#include<glad.h>
+#include<glad/glad.h>
 
 void inputInit(void);
 void processInput(void);
